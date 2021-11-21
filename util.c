@@ -82,13 +82,21 @@ void seek_to_sector(FILE * fp, int sector){
 	safe_fseek(fp, byteOffset, SEEK_SET);
 }
 
-unsigned int free_space(FILE * fp){
+// Free disk space
+unsigned int free_sectors(FILE * fp){
 	unsigned int max_fat_size = FAT_LEN_SECTORS * bytes_per_sector(fp);
 	seek_to_sector(fp, FAT_SECTOR);
-	
+
+	unsigned char bytes[2];
+	unsigned int fat_val = 0;
 	int sum = 0;
-	for(int i = 0;i<max_fat_size;i++){
-		if (fgetc(fp) == 0)	sum++;
+	for(int i = 0;i<max_fat_size;i+=2){
+		fread(bytes, 1, 2, fp);
+		fat_val = bytes[0] | (bytes[1]<<8);
+		
+		if(fat_val == 0){
+			sum++;
+		}
 	}
 	return sum;
 }

@@ -87,10 +87,12 @@ int main(int argc, char *argv[])
 	char * os_name = get_os_name(fp);
 	char * volume_label = get_volume_label(fp);
 	unsigned int total_size = get_sector_count(fp) * bytes_per_sector(fp);
+	unsigned int empty = free_space(fp) * bytes_per_sector(fp);
 
 	printf("OS Name: %s\n", os_name);
 	printf("Volume Label: %s\n", volume_label);
 	printf("Total size: %d B\n", total_size);
+	printf("Free space: %d B\n", empty);
 
     return EXIT_SUCCESS;
 }
