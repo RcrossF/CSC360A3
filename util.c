@@ -88,6 +88,7 @@ unsigned int free_space(FILE * fp){
 	
 	int sum = 0;
 	for(int i = 0;i<max_fat_size;i++){
-		//TODO
+		if (fgetc(fp) == 0)	sum++;
 	}
+	return sum;
 }

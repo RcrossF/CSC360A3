@@ -20,4 +20,6 @@ unsigned int sectors_per_cluster(FILE * fp);
 unsigned int cluster_size(FILE * fp, unsigned int num_clusters);
 
 void seek_to_root(FILE * fp);
+
+unsigned int free_space(FILE * fp);
 #endif

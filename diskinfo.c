@@ -8,7 +8,7 @@
 
 #define OS_NAME_OFFSET 3
 #define VOLUME_LABEL_OFFSET_BOOT 43
-#define VOLUME_LABEL_OFFSET_ROOT 96
+#define BYTES_PER_FAT_DIRECTORY_ENTRY 32
 #define NUM_SECTORS_OFFSET 19
 
 char * get_os_name(FILE* fp){
@@ -43,9 +43,21 @@ char * get_volume_label(FILE* fp){
 	if (blank){
 		// Seek to root
 		seek_to_sector(fp, ROOT_SECTOR);
-		// Seek to volume label
-		safe_fseek(fp, VOLUME_LABEL_OFFSET_ROOT, SEEK_CUR);
 
+		// Attribute is the 11th byte from the start
+		safe_fseek(fp, 11, SEEK_CUR);
+		char a = fgetc(fp);
+		while(a != 8){ // Stop fgetc from incrementing fp
+			safe_fseek(fp, -1, SEEK_CUR); //Backtrack to start of directory entry
+			safe_fseek(fp, BYTES_PER_FAT_DIRECTORY_ENTRY, SEEK_CUR); // Jump to next entry
+			a = fgetc(fp);
+		}
+		
+		// Found our label directory
+		// Backtrack from attribute field to name
+		safe_fseek(fp, -12, SEEK_CUR);
+
+		// Now read the label
 		int i = 0;
 		c = fgetc(fp);
 		while(c != 0){
@@ -54,7 +66,6 @@ char * get_volume_label(FILE* fp){
 			i++;
 		}
 	}
-
 	return volume_label;		
 }
 
