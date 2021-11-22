@@ -6,6 +6,7 @@
 #define ROOT_SECTOR 19
 #define DATA_SECTOR 33
 #define FAT_LEN_SECTORS 9
+#define ROOT_ITEM_SIZE 32
 
 void print_date_time(char* directory_entry_start_pos);
 

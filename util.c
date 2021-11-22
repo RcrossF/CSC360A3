@@ -10,6 +10,12 @@
 #define bytesPerSectorOffset 11
 #define sectorsPerClusterOffset 13
 
+// Converts 2 byte hex (little endian) to int
+unsigned int hex_to_int(unsigned char *bytes){
+	unsigned int sum = bytes[0] | (bytes[1]<<8);
+	return sum;
+}
+
 
 void print_date_time(char * directory_entry_start_pos){
 	int time, date;
@@ -58,12 +64,9 @@ void safe_fseek(FILE *fp, int offset, int whence){
 unsigned int bytes_per_sector(FILE * fp){
 	unsigned char bytes[2];
 	safe_fseek(fp, bytesPerSectorOffset, SEEK_SET);
-	bytes[0] = fgetc(fp);
-	bytes[1] = fgetc(fp);
+	fread(bytes, 1, 2, fp);
 
-	unsigned int sum = bytes[0] | (bytes[1]<<8);
-
-	return sum;
+	return hex_to_int(bytes);
 }
 
 unsigned int sectors_per_cluster(FILE * fp){
@@ -92,7 +95,7 @@ unsigned int free_sectors(FILE * fp){
 	int sum = 0;
 	for(int i = 0;i<max_fat_size;i+=2){
 		fread(bytes, 1, 2, fp);
-		fat_val = bytes[0] | (bytes[1]<<8);
+		fat_val = hex_to_int(bytes);
 		
 		if(fat_val == 0){
 			sum++;
@@ -100,3 +103,4 @@ unsigned int free_sectors(FILE * fp){
 	}
 	return sum;
 }
+

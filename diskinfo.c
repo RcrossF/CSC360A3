@@ -8,8 +8,8 @@
 
 #define OS_NAME_OFFSET 3
 #define VOLUME_LABEL_OFFSET_BOOT 43
-#define BYTES_PER_FAT_DIRECTORY_ENTRY 32
 #define NUM_SECTORS_OFFSET 19
+#define SUBDIRECTORY 16
 
 char * get_os_name(FILE* fp){
 	safe_fseek(fp, OS_NAME_OFFSET, SEEK_SET);
@@ -49,7 +49,7 @@ char * get_volume_label(FILE* fp){
 		char a = fgetc(fp);
 		while(a != 8){ // Stop fgetc from incrementing fp
 			safe_fseek(fp, -1, SEEK_CUR); //Backtrack to start of directory entry
-			safe_fseek(fp, BYTES_PER_FAT_DIRECTORY_ENTRY, SEEK_CUR); // Jump to next entry
+			safe_fseek(fp, ROOT_ITEM_SIZE, SEEK_CUR); // Jump to next entry
 			a = fgetc(fp);
 		}
 		
@@ -80,6 +80,41 @@ unsigned int get_sector_count(FILE * fp){
 	return sum;
 }
 
+// Returns count of all files on the disk
+int count_files(FILE * fp){
+	unsigned char c;
+	unsigned char bytes[2];
+	int cluster;
+	int files = 0;
+	unsigned int search_space = (ROOT_SECTOR - DATA_SECTOR) * bytes_per_sector(fp);
+	seek_to_sector(fp, ROOT_SECTOR);
+	// Advance to the extension field
+	safe_fseek(fp, 8, SEEK_CUR);
+	for (int i=0;i<search_space;i+=ROOT_ITEM_SIZE){
+		// Check extension
+		c = fgetc(fp);
+		if(c)	files++;
+		else{
+			// Maybe it's a directory
+			safe_fseek(fp, 2, SEEK_CUR); // Advance to attribute field
+			c = fgetc(fp);
+			// No subdirectories here
+			if(c != SUBDIRECTORY){
+				// Check which cluster is pointed to
+				// Advance fp
+				safe_fseek(fp, 14, SEEK_CUR);
+				fread(bytes, 1, 2, fp);
+				cluster = hex_to_int(bytes);
+				if(cluster != 0 && cluster != 1)	files++;
+			}
+		}
+		// Set fp to the extension field for the next iteration
+		seek_to_sector(fp, ROOT_SECTOR); //TODO: Hangs here?
+		safe_fseek(fp, i+ROOT_ITEM_SIZE+8, SEEK_CUR);
+	}
+	return files;
+}
+
 int main(int argc, char *argv[])
 {
     FILE *fp = open_file(argv[1]);
@@ -87,12 +122,15 @@ int main(int argc, char *argv[])
 	char * os_name = get_os_name(fp);
 	char * volume_label = get_volume_label(fp);
 	unsigned int total_size = get_sector_count(fp) * bytes_per_sector(fp);
-	unsigned int empty = free_space(fp) * bytes_per_sector(fp);
+	unsigned int empty = free_sectors(fp) * bytes_per_sector(fp);
+	int file_count = count_files(fp);
 
 	printf("OS Name: %s\n", os_name);
 	printf("Volume Label: %s\n", volume_label);
 	printf("Total size: %d B\n", total_size);
 	printf("Free space: %d B\n", empty);
+	printf("============\n");
+	printf("File Count: %d\n", file_count);
 
     return EXIT_SUCCESS;
 }
