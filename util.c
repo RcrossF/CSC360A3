@@ -85,22 +85,41 @@ void seek_to_sector(FILE * fp, int sector){
 	safe_fseek(fp, byteOffset, SEEK_SET);
 }
 
+void seek_to_cluster(FILE * fp, int cluster){
+	unsigned int byteOffset = (DATA_SECTOR + cluster - 2) * bytes_per_sector(fp);
+	safe_fseek(fp, byteOffset, SEEK_SET);
+}
+
+int get_FAT_entry(FILE * fp, int n) {
+	int result;
+	unsigned char bytes[2];
+
+	seek_to_sector(fp, FAT_SECTOR);
+	safe_fseek(fp, (((3*n) / 2)), SEEK_CUR);
+	fread(bytes, 1, 2, fp);
+	if ((n % 2) == 0) {
+		bytes[0] = bytes[0] & 0xFF;
+		bytes[1] = bytes[1] & 0x0F;
+		result = hex_to_int(bytes);
+	} 
+	else {
+		bytes[0] = bytes[0] & 0xF0;
+		bytes[1] = bytes[1] & 0xFF;
+		result = (bytes[0] >> 4) + (bytes[1] << 4);
+  	}
+	return result;
+}
+
 // Free disk space
 unsigned int free_sectors(FILE * fp){
-	unsigned int max_fat_size = FAT_LEN_SECTORS * bytes_per_sector(fp);
-	seek_to_sector(fp, FAT_SECTOR);
-
-	unsigned char bytes[2];
-	unsigned int fat_val = 0;
-	int sum = 0;
-	for(int i = 0;i<max_fat_size;i+=2){
-		fread(bytes, 1, 2, fp);
-		fat_val = hex_to_int(bytes);
-		
-		if(fat_val == 0){
+	unsigned int sum = 0;
+	for(unsigned int i = 0;i<=FAT_NUM_CLUSTERS;i++){
+		if(get_FAT_entry(fp, i) == 0){
 			sum++;
-		}
+		}	
 	}
+	printf("At byte %d\n", ftell(fp));
+	
 	return sum;
 }
 
