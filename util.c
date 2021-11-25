@@ -16,6 +16,13 @@ unsigned int hex_to_int(unsigned char *bytes){
 	return sum;
 }
 
+// Converts 4 byte hex (little endian) to int
+//UNTESTED
+unsigned int four_byte_hex_to_int(unsigned char *bytes){
+	unsigned int sum = bytes[0] | (bytes[1]<<8) | (bytes[2]<<16) | (bytes[3]<<32);
+	return sum;
+}
+
 // Assumes fp is in the correct location for date/time
 void print_date_time(FILE * fp){
 	long fp_loc = safe_ftell(fp);

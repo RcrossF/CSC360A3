@@ -6,6 +6,12 @@
 #include "util.h"
 
 
+void format_tree_print(char *str, int width)
+{
+    char buf[width+1];
+    printf("%-*s ", width, str);
+}
+
 void tree(FILE * fp, int target_cluster, char * dir_name){
     long fp_location = safe_ftell(fp);
     unsigned int dirs_to_search[FAT_NUM_CLUSTERS]; // Contains cluster of subdir to serach
@@ -20,8 +26,9 @@ void tree(FILE * fp, int target_cluster, char * dir_name){
     unsigned char name[9];
     unsigned char ext[4];
     unsigned int attr;
-    unsigned char bytes[2];
+    unsigned char bytes[4];
     int cluster;
+    unsigned int filesize;
 
     // Print dir name
     if(dir_name[0] != '\0'){
@@ -52,8 +59,12 @@ void tree(FILE * fp, int target_cluster, char * dir_name){
         fread(bytes, 1, 2, fp);
         cluster = hex_to_int(bytes);
 
+        // Get filesize
+        fread(bytes, 1, 4, fp);
+        filesize = four_byte_hex_to_int(bytes);
+
         // Seek to date/time location
-        safe_fseek(fp, -14, SEEK_CUR);
+        safe_fseek(fp, -18, SEEK_CUR);
 
         // Skip . files
         if(name[0] == '.'){
@@ -64,20 +75,29 @@ void tree(FILE * fp, int target_cluster, char * dir_name){
         else if(ext[0] != NULL && ext[0] != ' ' && attr == 0){
             // We have a file
             strip_trailing_spaces(name, 8);
+
+            // Print size
+            printf("F ");
+            char * tmp[32];
+            sprintf(tmp, "%u", filesize);
+            format_tree_print(tmp, 10);
+
             // Check for extension
             if (ext[0] == ' '){
-                printf("F   -1  %s  ", name);
+                format_tree_print(name, 10);
             }
             else{
-                printf("F   -1  %s.%s   ", name, ext);
+                sprintf(tmp, "%s.%s", name, ext);
+                format_tree_print(tmp, 10);
             }
-            
+
             print_date_time(fp);
             printf("\n");
         }
         else if(name[0] != NULL && name[0] != ' ' && cluster > 1 && attr == SUBDIRECTORY){
             // We have a subdirectory, append it to search after all files in the current directory have been visited
-            printf("D   0   %s", name);
+            printf("D 0          ");
+            format_tree_print(name, 10);
             print_date_time(fp);
             printf("\n");
 
