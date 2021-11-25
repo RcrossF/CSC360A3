@@ -18,7 +18,7 @@ void tree(FILE * fp, int target_cluster, char * dir_name){
 
     int num_dirs_to_search = 0;
     char search_dir_names[20][500];
-    unsigned int search_space = (ROOT_SECTOR - DATA_SECTOR) * bytes_per_sector(fp);
+    unsigned int search_space = (ROOT_SECTOR - DATA_SECTOR) * BYTES_PER_SECTOR;
     seek_to_sector(fp, ROOT_SECTOR);
     if(target_cluster > 0){
         seek_to_cluster(fp, target_cluster);
@@ -40,7 +40,7 @@ void tree(FILE * fp, int target_cluster, char * dir_name){
     printf("==================\n");
 
     // We're at the first name field
-	for (int i=0;i<search_space;i+=ROOT_ITEM_SIZE){
+	for (unsigned int i=0;i<search_space;i+=ROOT_ITEM_SIZE){
 		// Read name and extension
         fread(name, 1, 8, fp);
         fread(ext, 1, 3, fp);

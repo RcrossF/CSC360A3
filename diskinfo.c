@@ -127,7 +127,7 @@ int count_files(FILE * fp){
 	unsigned char bytes[2];
 	int cluster;
 	int files = 0;
-	unsigned int search_space = (ROOT_SECTOR - DATA_SECTOR) * bytes_per_sector(fp);
+	unsigned int search_space = (ROOT_SECTOR - DATA_SECTOR) * BYTES_PER_SECTOR;
 	seek_to_sector(fp, ROOT_SECTOR);
 	// Advance to the extension field
 	safe_fseek(fp, 8, SEEK_CUR);
@@ -164,8 +164,8 @@ int main(int argc, char *argv[])
 
 	char * os_name = get_os_name(fp);
 	char * volume_label = get_volume_label(fp);
-	unsigned int total_size = get_sector_count(fp) * bytes_per_sector(fp);
-	unsigned int empty = free_sectors(fp) * bytes_per_sector(fp);
+	unsigned int total_size = get_sector_count(fp) * BYTES_PER_SECTOR;
+	unsigned int empty = free_sectors(fp) * BYTES_PER_SECTOR;
 	int file_count = count_files(fp);
 
 

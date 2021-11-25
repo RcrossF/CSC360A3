@@ -17,7 +17,6 @@ unsigned int hex_to_int(unsigned char *bytes){
 }
 
 // Converts 4 byte hex (little endian) to int
-//UNTESTED
 unsigned int four_byte_hex_to_int(unsigned char *bytes){
 	unsigned int sum = bytes[0] | (bytes[1]<<8) | (bytes[2]<<16) | (bytes[3]<<32);
 	return sum;
@@ -83,14 +82,6 @@ long safe_ftell(FILE *fp){
 	return fp_location;
 }
 
-unsigned int bytes_per_sector(FILE * fp){
-	unsigned char bytes[2];
-	safe_fseek(fp, bytesPerSectorOffset, SEEK_SET);
-	fread(bytes, 1, 2, fp);
-
-	return hex_to_int(bytes);
-}
-
 unsigned int sectors_per_cluster(FILE * fp){
 	unsigned char byte;
 	safe_fseek(fp, sectorsPerClusterOffset, SEEK_SET);
@@ -99,16 +90,16 @@ unsigned int sectors_per_cluster(FILE * fp){
 }
 
 unsigned int cluster_size(FILE * fp, unsigned int num_clusters){
-	return (num_clusters * bytes_per_sector(fp) * sectors_per_cluster(fp));
+	return (num_clusters * BYTES_PER_SECTOR * sectors_per_cluster(fp));
 }
 
 void seek_to_sector(FILE * fp, int sector){
-	unsigned int byteOffset = sector * bytes_per_sector(fp);
+	unsigned int byteOffset = sector * BYTES_PER_SECTOR;
 	safe_fseek(fp, byteOffset, SEEK_SET);
 }
 
 void seek_to_cluster(FILE * fp, int cluster){
-	unsigned int byteOffset = (DATA_SECTOR + cluster - 2) * bytes_per_sector(fp);
+	unsigned int byteOffset = (DATA_SECTOR + cluster - 2) * BYTES_PER_SECTOR;
 	safe_fseek(fp, byteOffset, SEEK_SET);
 }
 

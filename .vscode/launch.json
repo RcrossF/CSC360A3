@@ -49,6 +49,30 @@
             ],
             "preLaunchTask": "Make",
             "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Diskget",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/diskget",
+            "args": [
+                "disk.IMA",
+                "ANS1.pdf"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Make",
+            "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
 }
