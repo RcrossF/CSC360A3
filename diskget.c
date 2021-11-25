@@ -51,11 +51,15 @@ int find_file(FILE * fp, char* search_name){
         // Read name and extension
         //TODO: strip trailing name spaces or change how strings are compared
         fread(name, 1, 8, fp);
-        // Null terminate string
-        name[12] = '\0';
+        fread(ext, 1, 3, fp);
+        // Null terminate strings
+        strip_trailing_spaces(name, 8);
+        ext[3] = '\0';
         // Read attribute
         attr = fgetc(fp);
 
+        // Join extension to name for easier comparison with filename
+        strcat(name, ext);
         //Match name, extension, and attribute (dir/volumeID could have same name)
         if((strcmp(name, search_name) == 0) && attr == 0){
             // Rewind fp to start of directory entry
@@ -106,7 +110,7 @@ unsigned char * read_file(FILE * fp, int start_dir_entry, unsigned int size){
 
 int main(int argc, char *argv[])
 {
-    char search_file[50];
+    char search_file[50] = {NULL};
     int dir_entry;
     unsigned int size;
 
