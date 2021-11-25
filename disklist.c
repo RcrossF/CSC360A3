@@ -9,7 +9,9 @@
 void tree(FILE * fp, int target_cluster, char * dir_name){
     long fp_location = safe_ftell(fp);
     unsigned int dirs_to_search[FAT_NUM_CLUSTERS]; // Contains cluster of subdir to serach
+
     int num_dirs_to_search = 0;
+    char search_dir_names[20][500];
     unsigned int search_space = (ROOT_SECTOR - DATA_SECTOR) * bytes_per_sector(fp);
     seek_to_sector(fp, ROOT_SECTOR);
     if(target_cluster > 0){
@@ -79,6 +81,14 @@ void tree(FILE * fp, int target_cluster, char * dir_name){
             print_date_time(fp);
             printf("\n");
 
+            // Setup for tracking directory name
+            char subdir[500];
+            char modified_name[500];
+            memcpy(subdir, dir_name, 500);
+            sprintf(modified_name, "/%s", name);
+            strcat(subdir, modified_name);
+            memcpy(search_dir_names[num_dirs_to_search], subdir, 500);
+
             dirs_to_search[num_dirs_to_search] = cluster;
             num_dirs_to_search++;
         }
@@ -90,15 +100,11 @@ void tree(FILE * fp, int target_cluster, char * dir_name){
         safe_fseek(fp, 18, SEEK_CUR);
 
     }
+    printf("\n");
     if(num_dirs_to_search > 0){
         for(int i = 0;i<num_dirs_to_search;i++){
-            // Setup for tracking directory name
-            char subdir[500];
-            char modified_name[500];
-            memcpy(subdir, dir_name, 500);
-            sprintf(modified_name, "/%s", name); //TODO: Store names and access here
-            strcat(subdir, modified_name);
-            tree(fp, dirs_to_search[i], subdir);
+            
+            tree(fp, dirs_to_search[i], search_dir_names[i]);
         }
     }
     safe_fseek(fp, fp_location, SEEK_SET);
