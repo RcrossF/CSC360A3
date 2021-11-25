@@ -8,8 +8,12 @@
 #define FAT_LEN_SECTORS 9
 #define ROOT_ITEM_SIZE 32
 #define FAT_NUM_CLUSTERS 256 * (FAT_LEN_SECTORS+2) + 32
+#define SUBDIRECTORY 16
+#define LONG_ENTRY 15
 
-void print_date_time(char* directory_entry_start_pos);
+unsigned int hex_to_int(unsigned char *bytes);
+
+void print_date_time(FILE * fp);
 
 FILE * open_file(char *file_path);
 
@@ -28,4 +32,8 @@ unsigned int free_space(FILE * fp);
 void seek_to_cluster(FILE * fp, int cluster);
 
 int get_FAT_entry(FILE * fp, int n);
+
+void strip_trailing_spaces(char * str, int length);
+
+long safe_ftell(FILE *fp);
 #endif

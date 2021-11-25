@@ -16,13 +16,18 @@ unsigned int hex_to_int(unsigned char *bytes){
 	return sum;
 }
 
-
-void print_date_time(char * directory_entry_start_pos){
+// Assumes fp is in the correct location for date/time
+void print_date_time(FILE * fp){
+	long fp_loc = safe_ftell(fp);
+	unsigned char bytes[2];
 	int time, date;
 	int hours, minutes, day, month, year;
 	
-	time = *(unsigned short *)(directory_entry_start_pos + timeOffset);
-	date = *(unsigned short *)(directory_entry_start_pos + dateOffset);
+
+	fread(bytes, 1, 2, fp);
+	time = hex_to_int(bytes);
+	fread(bytes, 1, 2, fp);
+	date = hex_to_int(bytes);
 	
 	//the year is stored as a value since 1980
 	//the year is stored in the high seven bits
@@ -31,15 +36,16 @@ void print_date_time(char * directory_entry_start_pos){
 	month = (date & 0x1E0) >> 5;
 	//the day is stored in the low five bits
 	day = (date & 0x1F);
-	
+
 	printf("%d-%02d-%02d ", year, month, day);
 	//the hours are stored in the high five bits
 	hours = (time & 0xF800) >> 11;
 	//the minutes are stored in the middle 6 bits
 	minutes = (time & 0x7E0) >> 5;
 	
-	printf("%02d:%02d\n", hours, minutes);
+	printf("%02d:%02d", hours, minutes);
 	
+	safe_fseek(fp, fp_loc, SEEK_SET);
 	return;	
 }
 
@@ -59,6 +65,15 @@ void safe_fseek(FILE *fp, int offset, int whence){
 		perror("Error seeking");
         exit(EXIT_FAILURE);
 	}
+}
+
+long safe_ftell(FILE *fp){
+	long fp_location = ftell(fp);
+	if (fp_location == -1){
+		perror("Ftell failed");
+		exit(EXIT_FAILURE);
+	}
+	return fp_location;
 }
 
 unsigned int bytes_per_sector(FILE * fp){
@@ -118,8 +133,14 @@ unsigned int free_sectors(FILE * fp){
 			sum++;
 		}	
 	}
-	printf("At byte %d\n", ftell(fp));
-	
 	return sum;
 }
 
+void strip_trailing_spaces(char * str, int length){
+	for(int i=length;i>0;i--){
+		if(str[i] == ' ' && str[i-1] != ' '){
+			str[i] = '\0';
+			return;
+		}
+	}
+}

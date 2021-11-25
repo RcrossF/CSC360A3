@@ -9,7 +9,6 @@
 #define OS_NAME_OFFSET 3
 #define VOLUME_LABEL_OFFSET_BOOT 43
 #define NUM_SECTORS_OFFSET 19
-#define SUBDIRECTORY 16
 #define SECTORS_PER_FAT 9
 #define NUM_FATS 2
 
@@ -87,11 +86,7 @@ int subdir_file_count(FILE * fp, int cluster){
 	int count = 0;
 	int subdir_cluster = 0;
 	unsigned char bytes;
-	long fp_location = ftell(fp);
-	if (fp_location == -1){
-		perror("Ftell failed");
-		exit(EXIT_FAILURE);
-	}
+	long fp_location = safe_ftell(fp);
 	seek_to_cluster(fp, cluster);
 	c = fgetc(fp);
 	while(c == '.'){
