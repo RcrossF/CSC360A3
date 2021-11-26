@@ -136,5 +136,6 @@ int main(int argc, char *argv[]){
     dir_name[0] = '\0';
     tree(fp,0,dir_name);
 
+    fclose(fp);
     return EXIT_SUCCESS;
 }

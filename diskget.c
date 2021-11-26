@@ -29,6 +29,18 @@ void remove_period(char * str){
     }
 }
 
+void write_to_linux(char * file_name, unsigned char* data, unsigned int size){
+    FILE * fp = fopen(file_name, "w");
+    if (fp == NULL){
+        perror("Error opening file to write");
+        exit(EXIT_FAILURE);
+    }
+
+    fwrite(data, size, sizeof(char), fp);
+
+    fclose(fp);
+}
+
 // Returns filesize of directory entry fp currently points to
 unsigned int file_size(FILE * fp){
     unsigned char bytes[4];
@@ -77,6 +89,7 @@ int find_file(FILE * fp, char* search_name){
 unsigned char * read_file(FILE * fp, int start_dir_entry, unsigned int size){
     unsigned char * file_bytes = malloc(size*sizeof(char) + 1);
     unsigned char * chunk[513];
+    int chunk_size;
     unsigned char bytes[2];
     int cluster;
     unsigned int bytes_so_far = 0;
@@ -92,25 +105,26 @@ unsigned char * read_file(FILE * fp, int start_dir_entry, unsigned int size){
         // Read data cluster
         seek_to_sector(fp, cluster + DATA_SECTOR - 2);
         if(size - bytes_so_far < 512){
-            fread(chunk, 1, size - bytes_so_far, fp);
-            bytes_so_far += (size - bytes_so_far);
-        }
+            chunk_size = size - bytes_so_far;
+        }  
         else{
-            fread(chunk, 1, 512, fp);
-            bytes_so_far += 512;
+            chunk_size = 512;
         }
-        strcat(file_bytes, chunk);
+        fread(chunk, 1, chunk_size, fp);
+        memcpy(&file_bytes[bytes_so_far], chunk, chunk_size);
+        bytes_so_far += chunk_size;
 
         // Find next data cluster to read
         cluster = get_FAT_entry(fp, cluster);
     }
-    // TODO: Un null-terminate the file
+
     return file_bytes;
 }
 
 int main(int argc, char *argv[])
 {
     char search_file[50] = {NULL};
+    char new_file[50] = {NULL};
     int dir_entry;
     unsigned int size;
 
@@ -118,6 +132,7 @@ int main(int argc, char *argv[])
     strcat(search_file, argv[2]);
 
     str_to_upper(search_file);
+    strcat(new_file, search_file);
     remove_period(search_file);
 
     // Find file's directory entry
@@ -132,8 +147,12 @@ int main(int argc, char *argv[])
     size = file_size(fp);
 
     // Read file into memory
-
+    char * file_bytes = read_file(fp, dir_entry, size);
 
     // Write file to current linux dir
+    write_to_linux(new_file, file_bytes, size);
+    
+    fclose(fp);
     return EXIT_SUCCESS;
+
 }

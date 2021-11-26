@@ -179,6 +179,6 @@ int main(int argc, char *argv[])
 	printf("Number of FAT copies: %d\n", NUM_FATS); // Same for every FAT12 disk
 	printf("Sectors per FAT: %d\n", SECTORS_PER_FAT); // Same for every FAT12 disk
 
-
+	fclose(fp);
     return EXIT_SUCCESS;
 }
