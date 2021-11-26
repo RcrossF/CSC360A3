@@ -38,4 +38,8 @@ int get_FAT_entry(FILE * fp, int n);
 void strip_trailing_spaces(char * str, int length);
 
 long safe_ftell(FILE *fp);
+
+void str_to_upper(char * str);
+
+void remove_period(char * str);
 #endif

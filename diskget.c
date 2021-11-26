@@ -7,27 +7,6 @@
 
 #include "util.h"
 
-void str_to_upper(char * str){
-    int i = 0;
-    while(str[i] != NULL){
-        str[i] = toupper(str[i]);
-        i++;
-    }
-}
-
-void remove_period(char * str){
-    int i = 0;
-    while(str[i] != NULL){
-        if (str[i]=='.'){ 
-            for (int j=i; j<strlen(str); j++){
-                str[j]=str[j+1];
-            } 
-        }
-        else {
-            i++;
-        }
-    }
-}
 
 void write_to_linux(char * file_name, unsigned char* data, unsigned int size){
     FILE * fp = fopen(file_name, "w");
@@ -151,7 +130,7 @@ int main(int argc, char *argv[])
 
     // Write file to current linux dir
     write_to_linux(new_file, file_bytes, size);
-    
+
     fclose(fp);
     return EXIT_SUCCESS;
 
