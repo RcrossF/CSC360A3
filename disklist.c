@@ -131,7 +131,7 @@ void tree(FILE * fp, int target_cluster, char * dir_name){
 }
 
 int main(int argc, char *argv[]){
-    FILE *fp = open_file(argv[1]);
+    FILE *fp = open_file_read(argv[1]);
     char * dir_name = malloc(500*sizeof(char));
     dir_name[0] = '\0';
     tree(fp,0,dir_name);

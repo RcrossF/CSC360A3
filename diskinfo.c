@@ -160,7 +160,7 @@ int count_files(FILE * fp){
 
 int main(int argc, char *argv[])
 {
-    FILE *fp = open_file(argv[1]);
+    FILE *fp = open_file_read(argv[1]);
 
 	char * os_name = get_os_name(fp);
 	char * volume_label = get_volume_label(fp);

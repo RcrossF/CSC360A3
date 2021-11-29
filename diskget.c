@@ -9,7 +9,7 @@
 
 
 void write_to_linux(char * file_name, unsigned char* data, unsigned int size){
-    FILE * fp = fopen(file_name, "w");
+    FILE * fp = open_file_write(file_name);
     if (fp == NULL){
         perror("Error opening file to write");
         exit(EXIT_FAILURE);
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     int dir_entry;
     unsigned int size;
 
-    FILE *fp = open_file(argv[1]);
+    FILE *fp = open_file_read(argv[1]);
     strcat(search_file, argv[2]);
 
     str_to_upper(search_file);

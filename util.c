@@ -3,17 +3,35 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <string.h>
+
 #include "util.h"
 
-#define timeOffset 14 //offset of creation time in directory entry
-#define dateOffset 16 //offset of creation date in directory entry
-#define bytesPerSectorOffset 11
 #define sectorsPerClusterOffset 13
 
 // Converts 2 byte hex (little endian) to int
 unsigned int hex_to_int(unsigned char *bytes){
 	unsigned int sum = bytes[0] | (bytes[1]<<8);
 	return sum;
+}
+
+void write_2_byte_int(FILE * fp, unsigned int num){
+	unsigned char c0 = (num >> 8) & 0xFF;
+	unsigned char c1 = (num & 0xFF);
+	fputc(c1, fp);
+	fputc(c0, fp);
+}
+
+void write_4_byte_int(FILE * fp, unsigned int num){
+	unsigned char c0 = (num & 0xFF);
+	unsigned char c1 = (num >> 8) & 0xFF;
+	unsigned char c2 = (num >> 16) & 0xFF;
+	unsigned char c3 = (num >> 24) & 0xFF;
+	
+	fputc(c0, fp);
+	fputc(c1, fp);
+	fputc(c2, fp);
+	fputc(c3, fp);
 }
 
 // Converts 4 byte hex (little endian) to int
@@ -55,12 +73,34 @@ void print_date_time(FILE * fp){
 	return;	
 }
 
-FILE * open_file(char *file_path)
+FILE * open_file_read(char *file_path)
 {
     FILE *fp;
     fp = fopen(file_path, "r");
 	if (fp == NULL){
-		perror("Error opening file");
+		perror("Error opening file, program is case sensitive");
+		exit(EXIT_FAILURE);
+	}
+    return fp;
+}
+
+FILE * open_file_rw(char *file_path)
+{
+    FILE *fp;
+    fp = fopen(file_path, "r+");
+	if (fp == NULL){
+		perror("Error opening file, program is case sensitive");
+		exit(EXIT_FAILURE);
+	}
+    return fp;
+}
+
+FILE * open_file_write(char *file_path)
+{
+    FILE *fp;
+    fp = fopen(file_path, "w");
+	if (fp == NULL){
+		perror("Error opening file, program is case sensitive");
 		exit(EXIT_FAILURE);
 	}
     return fp;
@@ -103,12 +143,16 @@ void seek_to_cluster(FILE * fp, int cluster){
 	safe_fseek(fp, byteOffset, SEEK_SET);
 }
 
+void seek_to_FAT_cluster(FILE * fp, int n){
+	seek_to_sector(fp, FAT_SECTOR);
+	safe_fseek(fp, (((3*n) / 2)), SEEK_CUR);
+}
+
 int get_FAT_entry(FILE * fp, int n) {
 	int result;
 	unsigned char bytes[2];
 
-	seek_to_sector(fp, FAT_SECTOR);
-	safe_fseek(fp, (((3*n) / 2)), SEEK_CUR);
+	seek_to_FAT_cluster(fp, n);
 	fread(bytes, 1, 2, fp);
 	if ((n % 2) == 0) {
 		bytes[0] = bytes[0] & 0xFF;
@@ -122,6 +166,7 @@ int get_FAT_entry(FILE * fp, int n) {
   	}
 	return result;
 }
+
 
 // Free disk space
 unsigned int free_sectors(FILE * fp){

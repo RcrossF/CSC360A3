@@ -73,6 +73,30 @@
             ],
             "preLaunchTask": "Make",
             "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Diskput",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/diskput",
+            "args": [
+                "subdir.IMA",
+                "/sub1/ANS1.PDF"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Make",
+            "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
 }
