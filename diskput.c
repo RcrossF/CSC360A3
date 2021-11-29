@@ -65,11 +65,6 @@ unsigned char * read_file_bytes(char * file_name){
 
 void write_dir_time(FILE * fp, long file_create_time){
     struct tm * timeinfo;
-    unsigned char dostime[8] = {NULL};
-    unsigned char c0;
-    unsigned char c1;
-    unsigned char c2;
-    unsigned char c3;
 
     timeinfo = localtime(&file_create_time);
 

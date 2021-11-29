@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
     size = file_size(fp);
 
     // Read file into memory
-    char * file_bytes = read_file(fp, dir_entry, size);
+    unsigned char * file_bytes = read_file(fp, dir_entry, size);
 
     // Write file to current linux dir
     write_to_linux(new_file, file_bytes, size);
