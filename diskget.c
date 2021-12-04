@@ -40,7 +40,6 @@ int find_file(FILE * fp, char* search_name){
     unsigned int search_space = (ROOT_SECTOR - DATA_SECTOR) * BYTES_PER_SECTOR;
     for (unsigned int i=0;i<search_space;i+=ROOT_ITEM_SIZE){
         // Read name and extension
-        //TODO: strip trailing name spaces or change how strings are compared
         fread(name, 1, 8, fp);
         fread(ext, 1, 3, fp);
         // Null terminate strings
@@ -60,6 +59,10 @@ int find_file(FILE * fp, char* search_name){
         else if(name[0] == NULL && attr == 0){
             // Last entry
             break;
+        }
+        else{
+            // Not this file, continue
+            safe_fseek(fp, 20, SEEK_CUR);
         }
     }
     return 0;
