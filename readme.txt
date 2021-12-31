@@ -1,3 +1,5 @@
+Final assignment for Uvic's CSC 360 - Operating Systems. 
+
 Welcome to diskman! Diskman gives you control over a FAT12 filesystem.
 
 How to use:
